@@ -19,16 +19,9 @@ function Get-ErmeticUsers {
         [string] $Token
     )
 
-    $headers = @{
-        "Authorization" = "Bearer $Token"
-        "Content-Type"  = "application/json"
-    }
     $query = Use-ErmeticUsersQuery
-    Write-Host $query
     try {
-        $response = Invoke-RestMethod -Uri $Url -Headers $headers -Method Post -Body @{
-            query = Use-ErmeticUsersQuery
-        } -ErrorAction Stop
+        $response = Invoke-ErmeticGraphQL -Uri $Url -Token $Token -$Query $query
         $users = $response.data.UserRoleAssignments
         return $users
     }

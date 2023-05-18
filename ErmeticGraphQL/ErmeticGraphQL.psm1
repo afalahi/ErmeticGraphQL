@@ -13,19 +13,26 @@
 # limitations under the License.
 
 #Get public and private function definition files.
+$ModulePath = $PSScriptRoot
+
 $Public = @( Get-ChildItem -Path $PSScriptRoot\Public\*.ps1 -ErrorAction SilentlyContinue )
-$Private = @( Get-ChildItem -Path $PSScriptRoot\Private\*.ps1 -ErrorAction SilentlyContinue )
+# $Private = @( Get-ChildItem -Path $PSScriptRoot\Private\*.ps1 -ErrorAction SilentlyContinue )
 
 #Dot source the files
-Foreach ($import in @($Public + $Private)) {
-    Try {
-        . $import.FullName
-    }
-    Catch {
-        Write-Error -Message "Failed to import function $($import.FullName): $_"
+# Foreach ($import in @($Public + $Private)) {
+#     Try {
+#         . $import.FullName
+#     }
+#     Catch {
+#         Write-Error -Message "Failed to import function $($import.FullName): $_"
+#     }
+# }
+foreach ($FunctionType in @('Private', 'Public')) {
+    $Path = Join-Path -Path $ModulePath -ChildPath ('{0}\*.ps1' -f $FunctionType)
+    if (Test-Path -Path $Path) {
+        Get-ChildItem -Path $Path -Recurse | ForEach-Object -Process { . $_.FullName }
     }
 }
-
 # Here I might...
 # Read in or create an initial config file and variable
 # Export Public functions ($Public.BaseName) for WIP modules
