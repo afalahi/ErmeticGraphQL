@@ -1,6 +1,3 @@
-# Import-Module .\Invoke-GraphQL.ps1
-# Import-Module .\Use-AwsAccountQuery.ps1
-
 function Get-ErmeticAwsAccounts {
   [CmdletBinding()]  
   param (
@@ -8,19 +5,7 @@ function Get-ErmeticAwsAccounts {
     [ValidateSet("Valid", "Invalid")]
     [string]$Filter = 'All'
   )
-  # [string]$CurrentCursor = "null"
-  # $query = Use-ErmeticAwsAccountQuery -CurrentCursor $CurrentCursor
   $awsAccounts = Invoke-ErmeticGraphQL -Query Use-ErmeticAwsAccountQuery
-  # [object[]]$awsAccounts = $data.data.AwsAccounts.nodes
-  # [boolean]$hasNextPage = $data.data.AwsAccounts.pageInfo.hasNextPage
-  # [string]$CurrentCursor = '"' + $data.data.AwsAccounts.pageInfo.endCursor + '"'
-  # while ($hasNextPage -eq $true) {
-  #   $query = Use-ErmeticAwsAccountQuery -CurrentCursor $CurrentCursor
-  #   $data = Invoke-ErmeticGraphQL -Query $query
-  #   $awsAccounts += $data.data.AwsAccounts.nodes
-  #   $CurrentCursor = '"' + $data.data.AwsAccounts.pageInfo.endCursor + '"'
-  #   $hasNextPage = $data.data.AwsAccounts.pageInfo.hasNextPage
-  # }
   function FilterResults([string]$Filter) {
     switch ($Filter) {
       "Invalid" { 

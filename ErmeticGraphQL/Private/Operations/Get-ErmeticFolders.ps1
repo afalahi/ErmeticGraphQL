@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-Get-ErmeticFolders {
-  $query = Use-ErmeticFoldersQuery
-  $folders = Invoke-ErmeticGraphQL -Query $query
+function Get-ErmeticFolders {
+  $folders = Invoke-ErmeticGraphQL -Query Use-ErmeticFoldersQuery
   return $folders
 }

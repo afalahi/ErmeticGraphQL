@@ -12,25 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-function Use-ErmeticFoldersQuery {
-    param (
-        [string] $CurrentCursor,
-        [int] $First = 1000
-    )
+function Update-ErmeticConfig {
+  param (
+    [Parameter(Mandatory = $false)]
+    [string]$Token,
 
-    return @"
-query {
-    Folders(after: $CurrentCursor, first: $First) {
-        nodes {
-            Id
-            ParentScopeId
-            Name
-        }
-        pageInfo {
-            endCursor
-            hasNextPage
-        }
-    }
-}
-"@
+    [Parameter(Mandatory = $false)]
+    [string]$Uri
+  )
+
+  # Get the existing configurations
+  $existingToken = $global:Token
+  $existingUri = $global:Uri
+
+  # Update the configurations if new values are provided
+  if ($Token) {
+    $existingToken = $Token
+  }
+  if ($Uri) {
+    $existingUri = $Uri
+  }
+
+  # Call the private function Set-ModuleConfigInternal to save the updated configurations
+  Set-ErmeticConfig -Token $existingToken -Uri $existingUri
 }

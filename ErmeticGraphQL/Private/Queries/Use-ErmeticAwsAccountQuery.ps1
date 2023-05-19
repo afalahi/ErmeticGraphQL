@@ -1,4 +1,5 @@
-function Use-ErmeticAwsAccountQuery([string]$CurrentCursor) {
+function Use-ErmeticAwsAccountQuery {
+  param ([string]$CurrentCursor)
   return "query {
     AwsAccounts(after:$CurrentCursor) {
         nodes {
@@ -6,6 +7,7 @@ function Use-ErmeticAwsAccountQuery([string]$CurrentCursor) {
             Name
             Status
             Issues
+            ParentScopeId
             Audit
             CreationTime
         }
