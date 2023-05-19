@@ -13,6 +13,27 @@
 # limitations under the License.
 
 function Set-ErmeticConfig {
+    <#
+.SYNOPSIS
+Sets the configuration for the ErmeticGraphQL module.
+
+.DESCRIPTION
+The Set-ErmeticConfig cmdlet sets the configuration values for the ErmeticGraphQL module. It requires providing the Ermetic API token and URI. The provided token is securely stored in an XML configuration file, and the configuration values are set as global variables for the current PowerShell session.
+
+.PARAMETER Token
+The Ermetic API token to authenticate with the Ermetic platform.
+
+.PARAMETER Uri
+The URI of the Ermetic GraphQL endpoint.
+
+.EXAMPLE
+Set-ErmeticConfig -Token "YOUR_API_TOKEN" -Uri "https://example.ermetic.com/graphql"
+
+Description
+-------------
+Sets the Ermetic configuration with the provided API token and URI. The configuration values are securely stored and made available for use within the ErmeticGraphQL module.
+
+#>
     param (
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]

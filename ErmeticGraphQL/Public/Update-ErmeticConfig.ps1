@@ -13,6 +13,42 @@
 # limitations under the License.
 
 function Update-ErmeticConfig {
+  <#
+    .SYNOPSIS
+    Updates the Ermetic module configurations with new values for the token and URI.
+    
+    .DESCRIPTION
+    The Update-ErmeticConfig cmdlet is used to update the configuration settings for the Ermetic module.
+    You can provide new values for the API token and URI to be used for subsequent API calls.
+
+    .PARAMETER Token
+    The new value for the Ermetic API token. If not provided, the existing token value will be used.
+
+    .PARAMETER Uri
+    The new value for the Ermetic API URI. If not provided, the existing URI value will be used.
+
+    .EXAMPLE
+    Update-ErmeticConfig -Token "your_new_token"
+
+    Description
+    -------------
+    Updates the Ermetic module configuration with a new API token.
+
+    .EXAMPLE
+    Update-ErmeticConfig -Uri "https://api.ermetic.com/v2"
+
+    Description
+    -------------
+    Updates the Ermetic module configuration with a new API URI.
+
+    .EXAMPLE
+    Update-ErmeticConfig -Token "your_new_token" -Uri "https://api.ermetic.com/v2"
+
+    Description
+    -------------
+    Updates both the API token and URI in the Ermetic module configuration.
+
+    #>
   param (
     [Parameter(Mandatory = $false)]
     [string]$Token,
