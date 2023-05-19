@@ -52,12 +52,13 @@ Retrieves the invalid AWS accounts from Ermetic.
     }
   }
   $results = FilterResults -Filter $Filter
-  if ($CSV -eq $true) {
+  if ($CSV) {
     if ($results.GetType().Name -eq "String") {
       return $results
     }
     $fileName = "AwsAccounts-$Filter.csv"
     $results = $results | Export-Csv -Path .\$fileName -NoTypeInformation -Encoding utf8
+  } else {
+    return $results
   }
-  return $results
 }
