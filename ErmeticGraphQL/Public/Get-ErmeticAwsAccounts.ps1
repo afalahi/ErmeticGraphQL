@@ -1,4 +1,34 @@
 function Get-ErmeticAwsAccounts {
+  <#
+.SYNOPSIS
+Retrieves AWS accounts from Ermetic.
+
+.DESCRIPTION
+The Get-ErmeticAwsAccounts cmdlet retrieves AWS accounts from Ermetic. It can filter the accounts based on their status (Valid or Invalid) and export the results to a CSV file if specified.
+
+.PARAMETER CSV
+Specifies whether to export the retrieved data to a CSV file. If specified, a CSV file will be created with the AWS account information.
+
+.PARAMETER Filter
+Specifies the filter to apply to the AWS accounts. The valid values are "Valid", "Invalid", and "All". The default value is "All".
+
+.EXAMPLE
+Get-ErmeticAwsAccounts -CSV -Filter "Valid"
+
+Description
+-------------
+Retrieves the valid AWS accounts from Ermetic and exports the account information to a CSV file.
+
+.EXAMPLE
+Get-ErmeticAwsAccounts -Filter "Invalid"
+
+Description
+-------------
+Retrieves the invalid AWS accounts from Ermetic.
+
+#>
+
+
   [CmdletBinding()]  
   param (
     [switch]$CSV,
