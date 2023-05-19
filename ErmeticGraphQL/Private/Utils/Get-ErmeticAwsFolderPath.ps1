@@ -12,25 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-function Use-ErmeticFoldersQuery {
-    param (
-        [string] $CurrentCursor,
-        [int] $First = 1000
-    )
-
-    return @"
-query {
-    Folders(after: $CurrentCursor, first: $First) {
-        nodes {
-            Id
-            ParentScopeId
-            Name
-        }
-        pageInfo {
-            endCursor
-            hasNextPage
-        }
+function Get-ErmeticAwsFolderPath {
+  param (
+    [object[]] $Folders,
+    [string] $AwsFolderId
+  )
+  foreach ($Folder in $Folders) {
+    if ($Folder.Id -eq $AwsFolderId) {
+      $ParentId = $Folder.ParentScopeId
+      if ($null -eq $ParentId) {
+        return $Folder.Name
+      } else {
+        $ParentPath = Get-ErmeticAwsFolderPath -Folders $Folders -AwsFolderId $ParentId
+        return "$ParentPath/$($Folder.Name)"
+      }
     }
-}
-"@
+  }
+  return $null
 }

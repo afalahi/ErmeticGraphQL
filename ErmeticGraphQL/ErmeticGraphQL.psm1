@@ -37,5 +37,7 @@ foreach ($FunctionType in @('Private', 'Public')) {
 # Read in or create an initial config file and variable
 # Export Public functions ($Public.BaseName) for WIP modules
 # Set variables visible to the module and its functions only
-
+$global:Token = $null
+$global:Uri = $null
+Get-ErmeticConfig
 Export-ModuleMember -Function $Public.Basename
