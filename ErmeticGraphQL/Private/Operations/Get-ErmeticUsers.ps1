@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-using namespace System.Net
+Add-Type -AssemblyName "System.Net"
+Add-Type -AssemblyName "System.Net.Http"
 function Get-ErmeticUsers {
   [CmdletBinding()]
   $query = Use-ErmeticUsersQuery
@@ -31,19 +32,36 @@ function Get-ErmeticUsers {
   try {
     [object]$response = Invoke-WebRequest @Params -Body $serializedQuery -ErrorAction Stop | ConvertFrom-Json
     $users = $response.data.UserRoleAssignments
+    $token = $null
     return $users
   } catch [System.Net.Http.HttpRequestException] {
+    $token = $null
     $webException = $_.Exception
     $statusCode = $webException.Response.StatusCode
-    if ($statusCode -eq [HttpStatusCode]::Unauthorized) {
-      Write-Error "Web request failed with HTTP $statusCode $($_.Exception.Message)" -ErrorAction Stop
+    if ($statusCode -eq "Unauthorized") {
+      Write-Error "Web request failed with HTTP $statusCode $($_.Exception.Message)" -Category AuthenticationError -ErrorAction Stop
     }
     $responseBody = $_.ErrorDetails.Message | ConvertFrom-Json
     Write-Error "Web request failed with HTTP $statusCode $($_.Exception.Message) - $($responseBody.errors.message)" -ErrorAction Stop
   } catch [System.Net.WebException] {
-    $errorMessage = $webException.Message
-    Write-Error "Web request failed: $errorMessage" -ErrorAction Stop
+    $token = $null
+    $webException = $_.Exception
+    $statusCode = $webException.Response.StatusCode
+    $errorMessage = $_.Exception.Message
+    if ($statusCode -eq "Unauthorized") {
+      Write-Error "Web request failed: $errorMessage" -Category AuthenticationError -ErrorAction Stop
+    }
+    if ($statusCode -eq "BadRequest") {
+      $streamReader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+      $streamReader.BaseStream.Position = 0
+      $streamReader.DiscardBufferedData()
+      $responseBody = $streamReader.ReadToEnd() | ConvertFrom-Json
+      Write-Error "Web request failed: $errorMessage - $($responseBody.errors.message)"  -Category InvalidOperation -ErrorAction Stop
+    } else {
+      Write-Error "Web request failed: $errorMessage" -ErrorAction Stop
+    }
   } catch {
-    Write-Error "An unexpected error occurred: $($_.Exception.Message)" -ErrorAction Stop
+    $token = $null
+    Write-Error "An unexpected error occurred: $($_.Exception.Message)" -Category InvalidOperation -ErrorAction Stop
   }
 }
