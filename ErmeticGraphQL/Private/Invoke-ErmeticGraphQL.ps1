@@ -1,3 +1,5 @@
+Add-Type -AssemblyName "System.Net"
+Add-Type -AssemblyName "System.Net.Http"
 function Invoke-ErmeticGraphQL {
   [CmdletBinding()]
   param(
@@ -20,28 +22,9 @@ function Invoke-ErmeticGraphQL {
   $Params.Add("Headers", $headers)
   try {
     [object]$response = Invoke-WebRequest @Params -Body $serializedQuery -ErrorAction Stop | ConvertFrom-Json
-  } catch [System.Net.Http.HttpRequestException] {
-    $token = $null
-    $webException = $_.Exception
-    $statusCode = $webException.Response.StatusCode
-    if ($statusCode -eq [HttpStatusCode]::Unauthorized) {
-      Write-Error "Web request failed with HTTP $statusCode $($_.Exception.Message)" -ErrorAction Stop
-    }
-    $responseBody = $_.ErrorDetails.Message | ConvertFrom-Json
-    Write-Error "Web request failed with HTTP $statusCode $($_.Exception.Message) - $($responseBody.errors.message)" -ErrorAction Stop
-  } catch [System.Net.WebException] {
-    $token = $null
-    $errorMessage = $webException.Message
-    Write-Error "Web request failed: $errorMessage" -ErrorAction Stop
-  } catch {
-    $token = $null
-    Write-Error "An unexpected error occurred: $($_.Exception.Message)" -ErrorAction Stop
-  }
-  try {
     $resource = $response.data | Get-Member -MemberType Properties | ForEach-Object {
       return $_.Name
     }
-    # Prepare pagination variables
     $results = $response.data.$resource.nodes
     $hasNextPage = $response.data.$resource.pageInfo.hasNextPage
     $currentCursor = '"' + $response.data.$resource.pageInfo.endCursor + '"'
@@ -59,17 +42,30 @@ function Invoke-ErmeticGraphQL {
     $token = $null
     $webException = $_.Exception
     $statusCode = $webException.Response.StatusCode
-    if ($statusCode -eq [HttpStatusCode]::Unauthorized) {
-      Write-Error "Web request failed with HTTP $statusCode $($_.Exception.Message)" -ErrorAction Stop
+    if ($statusCode -eq "Unauthorized") {
+      Write-Error "Web request failed with HTTP $statusCode $($_.Exception.Message)" -Category AuthenticationError -ErrorAction Stop
     }
     $responseBody = $_.ErrorDetails.Message | ConvertFrom-Json
     Write-Error "Web request failed with HTTP $statusCode $($_.Exception.Message) - $($responseBody.errors.message)" -ErrorAction Stop
   } catch [System.Net.WebException] {
     $token = $null
-    $errorMessage = $webException.Message
-    Write-Error "Web request failed: $errorMessage" -ErrorAction Stop
+    $webException = $_.Exception
+    $statusCode = $webException.Response.StatusCode
+    $errorMessage = $_.Exception.Message
+    if ($statusCode -eq "Unauthorized") {
+      Write-Error "Web request failed: $errorMessage" -Category AuthenticationError -ErrorAction Stop
+    }
+    if ($statusCode -eq "BadRequest") {
+      $streamReader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+      $streamReader.BaseStream.Position = 0
+      $streamReader.DiscardBufferedData()
+      $responseBody = $streamReader.ReadToEnd() | ConvertFrom-Json
+      Write-Error "Web request failed: $errorMessage - $($responseBody.errors.message)"  -Category InvalidOperation -ErrorAction Stop
+    } else {
+      Write-Error "Web request failed: $errorMessage" -ErrorAction Stop
+    }
   } catch {
     $token = $null
-    Write-Error "An unexpected error occurred: $($_.Exception.Message)" -ErrorAction Stop
+    Write-Error "An unexpected error occurred: $($_.Exception.Message)" -Category InvalidOperation -ErrorAction Stop
   }
 }
