@@ -12,32 +12,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#Get public and private function definition files.
+#Set the module path from the Script Root
 $ModulePath = $PSScriptRoot
 
+#Get public and private function definition files.
 $Public = @( Get-ChildItem -Path $PSScriptRoot\Public\*.ps1 -ErrorAction SilentlyContinue )
-# $Private = @( Get-ChildItem -Path $PSScriptRoot\Private\*.ps1 -ErrorAction SilentlyContinue )
 
-#Dot source the files
-# Foreach ($import in @($Public + $Private)) {
-#     Try {
-#         . $import.FullName
-#     }
-#     Catch {
-#         Write-Error -Message "Failed to import function $($import.FullName): $_"
-#     }
-# }
+#Dot Source the files
 foreach ($FunctionType in @('Private', 'Public')) {
     $Path = Join-Path -Path $ModulePath -ChildPath ('{0}\*.ps1' -f $FunctionType)
     if (Test-Path -Path $Path) {
         Get-ChildItem -Path $Path -Recurse | ForEach-Object -Process { . $_.FullName }
     }
 }
-# Here I might...
-# Read in or create an initial config file and variable
-# Export Public functions ($Public.BaseName) for WIP modules
-# Set variables visible to the module and its functions only
+
+#Create the ermetic reports directory
+if (-not (Test-Path -Path "$Env:HOMEPATH\Documents\ErmeticReports")) {
+    New-Item -Path "$Env:HOMEPATH\Documents\ErmeticReports" -ItemType Directory
+}
+
+#Set global module variables
 $global:Token = $null
 $global:Uri = $null
+$global:filePath = "$Env:HOMEPATH\Documents\ErmeticReports"
+
+#Get the Ermetic config from file if exits
 Get-ErmeticConfig
+
+#Export all public functions
 Export-ModuleMember -Function $Public.Basename
