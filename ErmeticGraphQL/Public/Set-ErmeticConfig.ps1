@@ -46,7 +46,7 @@ Sets the Ermetic configuration with the provided API token and URI. The configur
 
     # Convert sensitive values to secure strings
     $secureToken = ConvertTo-SecureString -String $Token -AsPlainText -Force
-    $Token = $null
+    $Token = "null"
     # Create a hashtable with the secure strings
     $config = @{
         Token = $secureToken

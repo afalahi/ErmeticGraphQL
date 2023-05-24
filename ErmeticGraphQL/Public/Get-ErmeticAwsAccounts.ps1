@@ -56,8 +56,9 @@ Retrieves the invalid AWS accounts from Ermetic.
     if ($results.GetType().Name -eq "String") {
       return $results
     }
-    $fileName = "AwsAccounts-$Filter.csv"
-    $results = $results | Export-Csv -Path .\$fileName -NoTypeInformation -Encoding utf8
+    $fileName = "$global:filePath\AwsAccounts-$Filter-$(Get-Date -Format "yyyy-MM-dd").csv"
+    $results = $results | Export-Csv -Path $fileName -NoTypeInformation -Encoding utf8 -ErrorAction Stop
+    Write-Host "Wrote data to $fileName"
   } else {
     return $results
   }

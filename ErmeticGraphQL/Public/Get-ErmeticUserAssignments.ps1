@@ -39,7 +39,6 @@ Retrieves user assignments for Ermetic accounts and exports the data to a JSON f
 
   $accessReport = @()
   foreach ($account in $awsAccounts) {
-    # $usersArray = @()
     $obj = [ordered]@{
       AccountName = $account.Name
       AccountId   = $account.Id
@@ -85,13 +84,12 @@ Retrieves user assignments for Ermetic accounts and exports the data to a JSON f
     # $obj.Users = $usersArray
     $accessReport += $obj
   }
-
+  $fileName = "users-access-report-$(Get-Date -Format "yyyy-MM-dd")"
   if ($CSV) {
     try {
-      $csvFilePath = "users.csv"
+      $csvFilePath = "$global:filePath\$fileName.csv"
       $csvFileWriter = [System.IO.File]::CreateText($csvFilePath)
       try {
-        Write-Host @('AccountName', 'AccountID', 'UserId', 'Role', 'AccessType', 'FolderPath')
         $csvFileWriter.WriteLine(@('AccountName', 'AccountID', 'UserId', 'Role', 'AccessType', 'FolderPath') -join ",")
       } catch [System.IO.IOException] {
         throw "Error writing to file $($csvFilePath): $($_.Exception.Message)"
@@ -110,8 +108,8 @@ Retrieves user assignments for Ermetic accounts and exports the data to a JSON f
           throw "Error writing to file $($csvFilePath): $($_.Exception.Message)"
         }
       }
-
       $csvFileWriter.Close()
+      Write-Host "Wrote data to $csvFilePath"
     } catch [System.IO.FileNotFoundException] {
       throw "The file '$csvFilePath' is in use or we don't have access: $($_.Exception.Message)"
     } catch [System.UnauthorizedAccessException] {
@@ -120,11 +118,12 @@ Retrieves user assignments for Ermetic accounts and exports the data to a JSON f
       throw "The file '$csvFilePath' is in use or we don't have access: $($_.Exception.Message)"
     }
   } elseif ($JSON) {
-    $jsonFilePath = "users.json"
+    $jsonFilePath = "$global:filePath\$fileName.json"
     $jsonContent = ConvertTo-Json -InputObject $accessReport -Depth 100
 
     try {
       $jsonContent | Out-File -FilePath $jsonFilePath -Encoding UTF8
+      Write-Host "Wrote data to $jsonFilePath"
     } catch {
       throw "Error writing to file $($jsonFilePath): $($_.Exception.Message)"
     }

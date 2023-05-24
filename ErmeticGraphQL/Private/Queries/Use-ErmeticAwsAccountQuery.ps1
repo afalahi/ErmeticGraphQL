@@ -1,7 +1,10 @@
 function Use-ErmeticAwsAccountQuery {
-  param ([string]$CurrentCursor)
+  param (
+    [string]$CurrentCursor,
+    [int] $First = 1000
+  )
   return "query {
-    AwsAccounts(after:$CurrentCursor) {
+    AwsAccounts(after:$CurrentCursor, first:$First) {
         nodes {
             Id
             Name
